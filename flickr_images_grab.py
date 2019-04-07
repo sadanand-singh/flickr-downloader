@@ -22,7 +22,7 @@ import times
 import requests
 import flickr_api
 
-config = json.load(open('./config.json.default'))
+config = json.load(open('./config.json'))
 
 TAG = 'philMeta'
 API_KEY = config['flickr_api_key']
@@ -47,11 +47,13 @@ def unjsonpify(jsonp):
 
 
 def get_photo_info(photo):
-    params = {'api_key': API_KEY,
-              'photo_id': photo['id'],
-              'secret': photo['secret'],
-              'method': 'flickr.photos.getInfo',
-              'format': 'json'}
+    params = {
+        'api_key': API_KEY,
+        'photo_id': photo['id'],
+        'secret': photo['secret'],
+        'method': 'flickr.photos.getInfo',
+        'format': 'json',
+    }
     response = requests.get(REST_ENDPOINT, params=params)
     time.sleep(0.5)
     return json.loads(unjsonpify(response.text))
@@ -74,21 +76,15 @@ def download_search(results):
     if not os.path.isdir(IMG_DIR % meta['query']):
         os.makedirs(IMG_DIR % meta['query'])
     for i, photo in enumerate(results['photos']['photo']):
-        sys.stdout.write('\rdownloading photo %d/%d (%s)' %
-                         (i + 1,
-                          len(results['photos']['photo']),
-                          meta['query']))
+        sys.stdout.write(
+            '\rdownloading photo %d/%d (%s)'
+            % (i + 1, len(results['photos']['photo']), meta['query'])
+        )
         sys.stdout.flush()
         info = get_photo_info(photo)
         photos_data.append(info['photo'])
-        img_url = IMG_URL % (photo['farm'],
-                             photo['server'],
-                             photo['id'],
-                             photo['secret'])
-        img_url_s = IMG_URL_S % (photo['farm'],
-                                 photo['server'],
-                                 photo['id'],
-                                 photo['secret'])
+        img_url = IMG_URL % (photo['farm'], photo['server'], photo['id'], photo['secret'])
+        img_url_s = IMG_URL_S % (photo['farm'], photo['server'], photo['id'], photo['secret'])
         img_fname = IMG_FNAME % (meta['query'], photo['id'], meta['query'])
         img_fname_s = IMG_FNAME_S % (meta['query'], photo['id'], meta['query'])
         save_image(img_url, img_fname)
@@ -108,21 +104,22 @@ def download_searches(filenames):
 def search(query='pain'):
     if not os.path.isdir(SEARCHES_DIR):
         os.makedirs(SEARCHES_DIR)
-    params = {'api_key': API_KEY,
-              'safe_search': '1',  # safest
-              'media': 'photos',  # just photos
-              'content_type': '1',  # just photos
-              'privacy_filter': '1',  # public photos
-              'license': '1,2,4,5',  # see README.md
-              'per_page': '5000',  # max=500
-              'sort': 'relevance',
-              'method': 'flickr.photos.search',
-              'format': 'json'}
+    params = {
+        'api_key': API_KEY,
+        'safe_search': '1',  # safest
+        'media': 'photos',  # just photos
+        'content_type': '1',  # just photos
+        'privacy_filter': '1',  # public photos
+        'license': '1,2,4,5',  # see README.md
+        'per_page': '5000',  # max=500
+        'sort': 'relevance',
+        'method': 'flickr.photos.search',
+        'format': 'json',
+    }
     query_dict = {'text': query}
     clean_query = query.replace(' ', '-')
     fname = './search/search.%s.%s.json' % (clean_query, YMD)
-    response = requests.get(REST_ENDPOINT,
-                            params=dict(params, **query_dict))
+    response = requests.get(REST_ENDPOINT, params=dict(params, **query_dict))
     with open(fname, 'w') as f:
         data = json.loads(unjsonpify(response.text))
         data[TAG] = {}
@@ -133,12 +130,14 @@ def search(query='pain'):
 
 def keywords_search(args, keywords):
     for i, keyword in enumerate(keywords):
-        sys.stdout.write('\rrunning keyword search... %d/%d (%s)' %
-                         (i + 1, len(keywords), keyword))
+        sys.stdout.write(
+            '\rrunning keyword search... %d/%d (%s)' % (i + 1, len(keywords), keyword)
+        )
         sys.stdout.flush()
         search(keyword)
         time.sleep(1)
     print('\ndone')
+
 
 if __name__ == '__main__':
     import argparse
@@ -146,12 +145,11 @@ if __name__ == '__main__':
     # populate and parse command line options
     desc = 'Grab photos from Flickr.'
     parser = argparse.ArgumentParser(description=desc)
-    #parser.add_argument('infile', nargs='?', default=sys.stdin,
+    # parser.add_argument('infile', nargs='?', default=sys.stdin,
     #                    type=argparse.FileType('rU'),
     #                    help='input file (.csv)')
     parser.add_argument('-s', '--search', dest='search', action='store_true')
-    parser.add_argument('-d', '--download', dest='download',
-                        action='store_true')
+    parser.add_argument('-d', '--download', dest='download', action='store_true')
     args = parser.parse_args()
 
     if args.search:
