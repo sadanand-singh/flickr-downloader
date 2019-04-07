@@ -22,14 +22,14 @@ import times
 import requests
 import flickr_api
 
-config = json.load(open('./painladen.config'))
+config = json.load(open('./config.json.default'))
 
 TAG = 'philMeta'
 API_KEY = config['flickr_api_key']
 API_SECRET = config['flickr_api_secret']
 REST_ENDPOINT = 'https://api.flickr.com/services/rest/'
 SEARCHES_DIR = './search'
-IMG_URL = 'http://farm%s.staticflickr.com/%s/%s_%s_z.jpg'
+IMG_URL = 'http://farm%s.staticflickr.com/%s/%s_%s_b.jpg'
 IMG_FNAME = './images/%s/%s-%s.jpg'  # query/id-query.jpg
 IMG_URL_S = 'http://farm%s.staticflickr.com/%s/%s_%s_q.jpg'
 IMG_FNAME_S = './images/%s/%s_square-%s.jpg'  # query/id-query.jpg
@@ -92,7 +92,7 @@ def download_search(results):
         img_fname = IMG_FNAME % (meta['query'], photo['id'], meta['query'])
         img_fname_s = IMG_FNAME_S % (meta['query'], photo['id'], meta['query'])
         save_image(img_url, img_fname)
-        save_image(img_url_s, img_fname_s)
+        # save_image(img_url_s, img_fname_s)
     with open(DATA_FNAME % meta['query'], 'w') as f:
         json.dump(photos_data, f)
 
@@ -114,7 +114,7 @@ def search(query='pain'):
               'content_type': '1',  # just photos
               'privacy_filter': '1',  # public photos
               'license': '1,2,4,5',  # see README.md
-              'per_page': '500',  # max=500
+              'per_page': '5000',  # max=500
               'sort': 'relevance',
               'method': 'flickr.photos.search',
               'format': 'json'}
